@@ -12,7 +12,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import Colors from "@/constants/colors";
-import { Book as BookType } from "@/constants/books";
+import { Book as BookType } from "@/constants/book";
 import { useSavedBooks } from "@/contexts/SavedBooksContext";
 
 export default function SavedScreen() {
@@ -24,7 +24,7 @@ export default function SavedScreen() {
 
   const renderBook = ({ item }: { item: BookType }) => (
     <View style={styles.bookCard}>
-      <Image source={{ uri: item.cover }} style={styles.bookCover} />
+      <Image source={{ uri: item.coverUrl }} style={styles.bookCover} />
       <View style={styles.bookInfo}>
         <Text style={styles.bookTitle} numberOfLines={2}>
           {item.title}
@@ -35,11 +35,10 @@ export default function SavedScreen() {
         <View style={styles.stats}>
           <View style={styles.stat}>
             <Heart size={16} color={Colors.light.primary} fill={Colors.light.primary} />
-            <Text style={styles.statText}>{item.rating.toFixed(1)}</Text>
           </View>
           <View style={styles.stat}>
             <Book size={16} color={Colors.light.secondary} />
-            <Text style={styles.statText}>{item.pageCount} pages</Text>
+            <Text style={styles.statText}>{item.pages} pages</Text>
           </View>
         </View>
         <View style={styles.genres}>
