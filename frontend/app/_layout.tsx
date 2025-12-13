@@ -4,7 +4,7 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-
+import { PreferencesProvider, usePreferences } from "@/contexts/PreferencesContext";
 import { SavedBooksContext } from "@/contexts/SavedBooksContext";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -30,11 +30,13 @@ export default function RootLayout() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <SavedBooksContext>
-        <GestureHandlerRootView>
-          <RootLayoutNav />
-        </GestureHandlerRootView>
-      </SavedBooksContext>
+      <PreferencesProvider>
+        <SavedBooksContext>
+          <GestureHandlerRootView>
+            <RootLayoutNav />
+          </GestureHandlerRootView>
+        </SavedBooksContext>
+      </PreferencesProvider>
     </QueryClientProvider>
   );
 }

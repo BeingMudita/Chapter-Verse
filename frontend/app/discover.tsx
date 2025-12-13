@@ -268,6 +268,37 @@ const styles = StyleSheet.create({
     paddingTop: 12,
     paddingBottom: 8,
   },
+    emptyContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 24,
+    gap: 12,
+  },
+  emptyTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: Colors.light.primary,
+    textAlign: "center",
+  },
+  emptyText: {
+    fontSize: 14,
+    color: Colors.light.secondary,
+    textAlign: "center",
+    lineHeight: 20,
+  },
+  savedButton: {
+    marginTop: 12,
+    backgroundColor: Colors.light.primary,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 20,
+  },
+  savedButtonText: {
+    color: Colors.light.background,
+    fontWeight: "700",
+    fontSize: 16,
+  },
   headerTitle: {
     fontSize: 22,
     fontWeight: "700",
@@ -342,7 +373,32 @@ const styles = StyleSheet.create({
     color: Colors.light.primary,
     fontWeight: "700",
   },
-  controls: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-  }
+    controls: {
+      flexDirection: "row",
+      justifyContent: "space-around",
+      paddingVertical: 16,
+      paddingHorizontal: 20,
+      gap: 12,
+    },
+    passButton: {
+      flex: 1,
+      paddingVertical: 12,
+      paddingHorizontal: 24,
+      backgroundColor: Colors.light.secondary,
+      borderRadius: 10,
+      alignItems: "center",
+    },
+    likeButton: {
+      flex: 1,
+      paddingVertical: 12,
+      paddingHorizontal: 24,
+      backgroundColor: Colors.light.primary,
+      borderRadius: 10,
+      alignItems: "center",
+    },
+    controlText: {
+      fontWeight: "700",
+      fontSize: 16,
+      color: Colors.light.background,
+    },
+  });

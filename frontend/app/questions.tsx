@@ -11,6 +11,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { usePreferences } from "@/contexts/PreferencesContext";
 
 import Colors from "@/constants/colors";
 import { GENRES, THEMES, VIBES } from "@/constants/book";
@@ -19,9 +20,10 @@ interface Question {
   id: string;
   question: string;
   type: "multiple" | "single";
-  options: string[];
+  options: readonly string[];
   key: keyof QuestionAnswers;
 }
+const { setPreferences } = usePreferences();
 
 interface QuestionAnswers {
   genres: string[];
@@ -136,7 +138,8 @@ export default function QuestionsScreen() {
       setCurrentQuestion(currentQuestion + 1);
     } else {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      router.push("/discover");
+        setPreferences(answers);
+        router.replace("/discover");
     }
   };
 
