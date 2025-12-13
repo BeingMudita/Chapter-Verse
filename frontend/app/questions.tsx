@@ -23,7 +23,6 @@ interface Question {
   options: readonly string[];
   key: keyof QuestionAnswers;
 }
-const { setPreferences } = usePreferences();
 
 interface QuestionAnswers {
   genres: string[];
@@ -73,6 +72,7 @@ const QUESTIONS: Question[] = [
 
 export default function QuestionsScreen() {
   const [currentQuestion, setCurrentQuestion] = useState(0);
+  const { setPreferences } = usePreferences();
   const [answers, setAnswers] = useState<QuestionAnswers>({
     genres: [],
     vibes: [],
