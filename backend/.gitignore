@@ -6,3 +6,4 @@ __pycache__/
 instance/
 .env
 .env.*
+/data/raw/google_books.csv
