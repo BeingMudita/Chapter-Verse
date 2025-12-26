@@ -20,3 +20,13 @@ class RecommendRequest(BaseModel):
     ]] = None
 
     limit: Optional[int] = 12
+
+class BookResponse(BaseModel):
+    id: str
+    title: str
+    author: str
+    description: Optional[str]
+    genres: list[str]
+    pages: Optional[int]
+    cover_url: str
+    score: float
