@@ -20,7 +20,7 @@ def recommend_books(payload: RecommendRequest):
     vector = embed_text(query_text)
 
     results = qdrant.search(
-        collection_name="books",
+        collection_name="books_clean",
         query_vector=vector,
         limit=payload.limit,
         with_payload=True,
