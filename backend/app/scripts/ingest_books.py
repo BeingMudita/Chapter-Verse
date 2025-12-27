@@ -2,6 +2,7 @@ from qdrant_client import QdrantClient
 from qdrant_client.models import VectorParams, Distance, PointStruct
 from pathlib import Path
 import json
+import time
 
 from app.vector.embedding import model
 
@@ -22,6 +23,20 @@ with open(DATA_PATH, "r", encoding="utf-8") as f:
     books = json.load(f)
 
 print(f"Loaded {len(books)} books")
+
+# -----------------------------
+# Wait helper
+# -----------------------------
+def wait_for_qdrant(client, retries=6, delay=5):
+    for i in range(retries):
+        try:
+            client.get_collections()
+            print("✅ Qdrant is ready")
+            return
+        except Exception:
+            print(f"⏳ Waiting for Qdrant... ({i+1}/{retries})")
+            time.sleep(delay)
+    raise RuntimeError("❌ Qdrant did not become ready in time")
 
 # -----------------------------
 # Build texts + payloads
@@ -50,9 +65,14 @@ for book in books:
     })
 
 # -----------------------------
-# Connect to Qdrant
+# Connect to Qdrant (IMPORTANT)
 # -----------------------------
-client = QdrantClient(url=QDRANT_URL)
+client = QdrantClient(
+    url=QDRANT_URL,
+    timeout=120.0,   # 🔑 prevents random ReadTimeouts
+)
+
+wait_for_qdrant(client)
 
 # -----------------------------
 # Create collection (if needed)
@@ -72,7 +92,7 @@ else:
     print(f"Collection already exists: {COLLECTION_NAME}")
 
 # -----------------------------
-# 🔥 Embed ONCE (IMPORTANT)
+# Embed ONCE
 # -----------------------------
 print("Embedding books...")
 vectors = model.encode(
