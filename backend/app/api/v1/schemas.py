@@ -2,6 +2,7 @@ from pydantic import BaseModel
 from typing import List, Optional, Literal
 
 class RecommendRequest(BaseModel):
+    user_id: str
     # semantic
     genres: List[str]
     vibes: List[str]

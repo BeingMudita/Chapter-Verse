@@ -2,7 +2,13 @@ from fastapi import APIRouter
 from qdrant_client import QdrantClient
 from app.api.v1.schemas.recommend import RecommendRequest, BookResponse
 from app.vector.embedding import embed_text
-
+from app.services.user_profile import (
+    build_user_taste_vector,
+    blend_vectors,
+)
+from app.db.session import get_db
+from sqlalchemy.orm import Session
+from fastapi import Depends
 router = APIRouter()
 
 qdrant = QdrantClient(url="http://localhost:6333")
@@ -29,7 +35,7 @@ def page_score(preference: str | None, pages: int | None) -> float:
 
 
 @router.post("/recommend", response_model=list[BookResponse])
-def recommend_books(payload: RecommendRequest):
+def recommend_books(payload: RecommendRequest,db: Session = Depends(get_db)):
 
     query_text = " ".join(
         payload.genres
@@ -38,7 +44,18 @@ def recommend_books(payload: RecommendRequest):
         + [payload.pacePreference, payload.lengthPreference]
     )
 
-    vector = embed_text(query_text)
+    prompt_vector = embed_text(query_text)
+
+    taste_vector = build_user_taste_vector(
+        db=db,
+        user_id=payload.user_id,
+    )
+
+    vector = blend_vectors(
+        prompt_vector=prompt_vector,
+        taste_vector=taste_vector,
+    )
+    print("Taste vector exists:", taste_vector is not None)
 
     results = qdrant.search(
         collection_name="books_clean",
