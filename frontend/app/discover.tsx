@@ -17,11 +17,14 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import Colors from "@/constants/colors";
 // canonical book types + mock data
-import { Book, MOCK_BOOKS } from "@/constants/book";
+import { Book } from "@/constants/book";
 // saved books context
 import { useSavedBooks } from "@/contexts/SavedBooksContext";
 // preferences hook (get user answers)
 import { usePreferences } from "@/contexts/PreferencesContext";
+import { fetchRecommendations } from "@/src/api/recommend";
+import {sendSignal} from "@/src/api/signals";
+import { mapRecommendedBook } from "@/src/utils/mapBook";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.25;
@@ -35,25 +38,29 @@ export default function DiscoverScreen() {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
-    const scoreBook = (book: Book) => {
-      let score = 0;
-      const { genres = [], vibes = [], themes = [] } = preferences ?? {};
-      for (const g of genres) if (book.genres.includes(g)) score += 2;
-      for (const v of vibes) if (book.vibes.includes(v)) score += 1;
-      for (const t of themes) if (book.themes.includes(t)) score += 1;
-      if (preferences?.lengthPreference && book.pages) {
-        if (preferences.lengthPreference.includes("Short") && book.pages < 300)
-          score += 1;
-        if (preferences.lengthPreference.includes("Epic") && book.pages >= 450)
-          score += 1;
+    if (!preferences) return;
+
+    const load = async () => {
+      try {
+        const result = await fetchRecommendations({
+          user_id: "c3f7b7c1-5b8b-4a5c-9c6a-1d8c1f5a9d21", // replace with auth later
+          genres: preferences.genres ?? [],
+          vibes: preferences.vibes ?? [],
+          themes: preferences.themes ?? [],
+          pacePreference: preferences.pacePreference ?? null,
+          lengthPreference: preferences.lengthPreference ?? null,
+          limit: 10,
+        });
+
+        const mapped = result.map(mapRecommendedBook);
+        setBooks(mapped);
+        setCurrentIndex(0);
+      } catch (err) {
+        console.error("Failed to load recommendations", err);
       }
-      return score;
     };
 
-    const scored = MOCK_BOOKS.map((b) => ({ b, score: scoreBook(b) }));
-    scored.sort((a, z) => z.score - a.score || Math.random() - 0.5);
-    setBooks(scored.map((s) => s.b));
-    setCurrentIndex(0);
+    load();
   }, [preferences]);
 
   const position = useRef(new Animated.ValueXY()).current;
@@ -111,9 +118,19 @@ export default function DiscoverScreen() {
     if (direction === "right") {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       addBook(book);
+      sendSignal({
+        user_id: "c3f7b7c1-5b8b-4a5c-9c6a-1d8c1f5a9d21", // replace with auth later
+        book_id: book.id,
+        signal:"like",
+      });
     } else {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
+    sendSignal({
+        user_id: "c3f7b7c1-5b8b-4a5c-9c6a-1d8c1f5a9d21", // replace with auth later
+        book_id: book.id,
+        signal:"like",
+      });
 
     position.setValue({ x: 0, y: 0 });
     setCurrentIndex((i) => i + 1);
