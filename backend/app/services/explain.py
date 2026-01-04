@@ -1,28 +1,47 @@
+from typing import List, Optional
+
+
 def build_reasons(
     *,
     vector_score: float,
     genre_score: float,
     page_score: float,
-    user_genres: list[str],
-    book_genres: list[str],
+    user_genres: List[str],
+    book_genres: List[str],
     used_taste_vector: bool,
-    pages: int | None,
-):
-    reasons =[]
-    signals = []
+    pages: Optional[int],
+) -> List[str]:
 
-    signals.append(("semantic", vector_score))
-    signals.append(("genre", genre_score))
-    signals.append(("length", page_score))
+    reasons: List[str] = []
 
-    signals.sort(key=lambda x: x[1], reverse=True)
-    top_signal = signals[0][0]
+    # 🥇 1. Taste-first (highest trust)
+    if used_taste_vector:
+        reasons.append(
+            "Recommended because it’s similar to books you’ve interacted with"
+        )
 
-    if top_signal == "semantic":
-        reasons.append("Closely matches the mood and themes you’re exploring")
-    elif top_signal == "genre":
-        reasons.append("Strong overlap with genres you enjoy")
-    elif top_signal == "length":
-        reasons.append("Fits your preferred book length")
+    # 🥈 2. Semantic / mood match
+    elif vector_score >= 0.45:
+        reasons.append(
+            "Matches the mood, themes, and emotional tone you’re exploring"
+        )
+
+    # 🥉 3. Genre overlap
+    elif genre_score > 0:
+        overlap = set(g.lower() for g in user_genres) & set(
+            g.lower() for g in book_genres
+        )
+        if overlap:
+            reasons.append(
+                f"Shares genres you like such as {', '.join(list(overlap)[:2])}"
+            )
+
+    # 🧩 4. Length preference (supporting reason)
+    if page_score == 1 and pages:
+        reasons.append("Fits your preferred reading length")
+
+    # 🧼 Safety fallback
+    if not reasons:
+        reasons.append("Recommended based on overall relevance")
 
     return reasons

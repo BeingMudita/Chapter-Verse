@@ -79,6 +79,7 @@ def recommend_books(payload: RecommendRequest,db: Session = Depends(get_db)):
             + 0.25 * g_score
             + 0.15 * p_score
         )
+
         reasons = build_reasons(
             vector_score=v_score,
             genre_score=g_score,
@@ -88,6 +89,7 @@ def recommend_books(payload: RecommendRequest,db: Session = Depends(get_db)):
             used_taste_vector=taste_vector is not None,
             pages=data.get("pages"),
         )
+
         ranked.append(
             BookResponse(
                 id=data.get("id"),
