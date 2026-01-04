@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.db.session import get_db
 from app.db.models.user_signal import UserSignal
-from app.api.v1.schemas.signal import UserSignalRequest
+from app.api.v1.schemas import UserSignalRequest
 
 router = APIRouter(prefix="/signals", tags=["signals"])
 

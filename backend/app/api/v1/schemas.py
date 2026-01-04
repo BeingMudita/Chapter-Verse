@@ -1,33 +1,35 @@
 from pydantic import BaseModel
 from typing import List, Optional, Literal
+from uuid import UUID
 
+
+# ---------- RECOMMEND ----------
 class RecommendRequest(BaseModel):
-    user_id: str
-    # semantic
+    user_id: UUID
+
     genres: List[str]
     vibes: List[str]
     themes: List[str]
 
-    # behavioral
-    pacePreference: Optional[Literal[
-        "Slow burn", "Fast-paced", "I like variety"
-    ]] = None
+    pacePreference: Optional[str] = None
+    lengthPreference: Optional[str] = None
 
-    lengthPreference: Optional[Literal[
-        "Short & sweet (< 300 pages)",
-        "Medium (300-450 pages)",
-        "Epic (> 450 pages)",
-        "Length doesn't matter"
-    ]] = None
+    limit: int = 5
 
-    limit: Optional[int] = 12
 
 class BookResponse(BaseModel):
     id: str
     title: str
     author: str
     description: Optional[str]
-    genres: list[str]
+    genres: List[str]
     pages: Optional[int]
-    cover_url: str
+    cover_url: Optional[str]
     score: float
+
+
+# ---------- SIGNALS ----------
+class UserSignalRequest(BaseModel):
+    user_id: UUID
+    book_id: str
+    signal: Literal["click", "like", "save"]

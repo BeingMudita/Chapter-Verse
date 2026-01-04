@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 from qdrant_client import QdrantClient
-from app.api.v1.schemas.recommend import RecommendRequest, BookResponse
+from app.api.v1.schemas import RecommendRequest, BookResponse
 from app.vector.embedding import embed_text
 from app.services.user_profile import (
     build_user_taste_vector,
