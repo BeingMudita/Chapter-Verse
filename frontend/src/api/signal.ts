@@ -5,7 +5,7 @@ export type UserSignalPayload = {
 };
 
 export async function sendSignal(payload: UserSignalPayload) {
-  const res = await fetch("http://10.0.2.2:8000/api/v1/signals/event", {
+  const res = await fetch("http://127.0.0.1:8000/api/v1/signals/event", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
