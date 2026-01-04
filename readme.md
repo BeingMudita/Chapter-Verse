@@ -1,223 +1,304 @@
-Chapter-Verse Backend — Intelligent Book Recommendation System
+# Chapter-Verse — Intelligent Book Recommendation System
 
-Chapter-Verse is an AI-driven book recommendation backend that combines semantic search, behavioral learning, and hybrid ranking to deliver personalized, explainable book suggestions.
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/)
+[![React Native](https://img.shields.io/badge/React%20Native-0.81.5-blue.svg)](https://reactnative.dev/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-green.svg)](https://fastapi.tiangolo.com/)
 
-This system is designed to feel smart, adaptive, and human-aware — not just keyword-based.
+Chapter-Verse is an AI-driven book recommendation system that combines semantic search, behavioral learning, and hybrid ranking to deliver personalized, explainable book suggestions. It consists of a powerful backend API and a user-friendly cross-platform mobile/web app.
 
-🧠 Core Philosophy
+The system is designed to feel smart, adaptive, and human-aware — not just keyword-based.
 
-Traditional recommenders answer:
+## Table of Contents
 
-“Which books are similar to this query?”
+- [Overview](#overview)
+- [Features](#features)
+- [Architecture](#architecture)
+- [Project Structure](#project-structure)
+- [Installation](#installation)
+- [Usage](#usage)
+- [API Documentation](#api-documentation)
+- [Contributing](#contributing)
+- [License](#license)
 
-Chapter-Verse answers:
+## Overview
 
-“Which books fit this reader, right now, and why?”
+Traditional recommenders answer: *"Which books are similar to this query?"*
+
+Chapter-Verse answers: *"Which books fit this reader, right now, and why?"*
 
 To achieve this, we combine:
+- Semantic meaning
+- User behavior signals
+- Preference heuristics
+- Transparent ranking logic
 
-semantic meaning
+## Features
 
-user behavior signals
+- **Semantic Search**: Leverages transformer models to understand book content and user intent beyond keywords.
+- **Behavioral Learning**: Tracks user interactions (clicks, likes, saves) to build personalized taste vectors.
+- **Hybrid Ranking**: Combines vector similarity, genre overlap, and page length preferences for accurate recommendations.
+- **Cold-Start Handling**: Works effectively for new users by blending prompt vectors with defaults.
+- **Cross-Platform App**: Native iOS/Android app with web support via Expo.
+- **Explainable Recommendations**: Provides scoring breakdowns for transparency.
+- **Real-time Personalization**: Adapts recommendations based on ongoing user behavior.
 
-preference heuristics
+## Architecture
 
-transparent ranking logic
-
-🏗️ Architecture Overview
-Client
+```
+Client (Mobile/Web App)
   |
   |  (preferences, vibes, themes)
   v
-FastAPI (/recommend)
+FastAPI Backend (/api/v1/recommend)
   |
   |── Embed prompt (semantic intent)
   |── Build user taste vector (behavioral memory)
   |── Blend vectors (cold-start aware)
   v
-Qdrant Vector DB
+Qdrant Vector Database
   |
   |── Over-fetch semantic matches
   v
 Hybrid Re-Ranking Layer
   |
-  |── Vector similarity
-  |── Genre overlap
-  |── Page length preference
+  |── Vector similarity (60%)
+  |── Genre overlap (25%)
+  |── Page length preference (15%)
   v
 Ranked, Explainable Recommendations
+```
 
-📂 Project Structure (Backend)
+## Project Structure
+
+### Backend
+
+The backend is built with FastAPI and handles all AI-driven recommendation logic.
+
+```
 backend/
-│
 ├── app/
-│   ├── api/
-│   │   └── v1/
-│   │       ├── recommend.py        # Recommendation endpoint
-│   │       ├── signals.py          # User behavior tracking
-│   │       ├── router.py           # API router
-│   │       └── schemas.py          # All request/response models
-│   │
+│   ├── api/v1/
+│   │   ├── recommend.py        # Main recommendation endpoint
+│   │   ├── signals.py          # User behavior tracking
+│   │   ├── router.py           # API router
+│   │   └── schemas.py          # Request/response models
 │   ├── db/
-│   │   ├── models/
-│   │   │   └── user_signal.py      # SQLAlchemy model
-│   │   └── session.py              # DB session handling
-│   │
+│   │   ├── models/             # SQLAlchemy models
+│   │   └── session.py          # Database session handling
 │   ├── services/
-│   │   └── user_profile.py         # Taste vector logic
-│   │
+│   │   ├── user_profile.py     # Taste vector logic
+│   │   ├── recommender.py      # Recommendation service
+│   │   └── embeddings.py       # Embedding utilities
 │   ├── vector/
-│   │   └── embedding.py            # SentenceTransformer wrapper
-│   │
-│   └── main.py                     # FastAPI app entry
-│
+│   │   ├── embedding.py        # SentenceTransformer wrapper
+│   │   ├── search.py           # Qdrant search logic
+│   │   └── client.py           # Qdrant client
+│   ├── ml/
+│   │   ├── embedding.py        # ML embedding models
+│   │   └── builders.py         # Vector builders
+│   └── main.py                 # FastAPI app entry point
 ├── data/
-│   └── processed/books_clean.json  # Cleaned book dataset
-│
+│   ├── raw/                    # Raw book data
+│   └── processed/              # Processed datasets
 ├── scripts/
-│   └── ingest_books.py             # Qdrant ingestion script
-│
-└── README.md
+│   ├── ingest_books.py         # Qdrant data ingestion
+│   ├── process_books.py        # Data processing
+│   └── seed_books.py           # Database seeding
+└── tests/                      # Unit tests
+```
 
-🔍 Recommendation Flow (Step-by-Step)
-1️⃣ User Request (/api/v1/recommend)
+### Frontend
 
-The client sends a structured request:
+The frontend is a React Native app built with Expo, supporting iOS, Android, and Web.
 
-{
-  "user_id": "uuid",
-  "genres": ["romance"],
-  "vibes": ["dark"],
-  "themes": ["intimacy"],
-  "pacePreference": "Slow burn",
-  "lengthPreference": "Short & sweet (< 300 pages)",
-  "limit": 5
-}
+```
+frontend/
+├── app/                        # Expo Router pages
+│   ├── index.tsx               # Home screen
+│   ├── discover.tsx            # Book discovery
+│   ├── saved.tsx               # Saved books
+│   └── questions.tsx           # Preference questions
+├── assets/                     # Images and icons
+├── constants/                  # App constants
+├── contexts/                   # React contexts for state
+└── ...
+```
 
-2️⃣ Semantic Embedding
+## Installation
 
-We convert the user’s intent into a vector using a transformer model:
+### Prerequisites
 
-prompt_vector = embed_text(query_text)
+- Python 3.8 or higher
+- Node.js 16 or higher
+- Docker (for Qdrant vector database)
+- PostgreSQL database
+- Git
 
+### Backend Setup
 
-This captures meaning, not keywords.
+1. **Clone the repository:**
+   ```bash
+   git clone <repository-url>
+   cd Chapter-Verse
+   ```
 
-3️⃣ Cold-Start Personalization (User Taste Vector)
+2. **Set up the backend:**
+   ```bash
+   cd backend
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   pip install -r requirements.txt
+   ```
 
-User behavior is stored in user_signal table:
+3. **Set up databases:**
+   - Start PostgreSQL and create a database
+   - Run Qdrant with Docker: `docker run -p 6333:6333 qdrant/qdrant`
 
-Signal	Meaning
-click	interest
-like	strong preference
-save	long-term intent
+4. **Configure environment variables:**
+   Create a `.env` file with database URLs, API keys, etc.
 
-From this history we build a taste vector:
+5. **Initialize the database:**
+   ```bash
+   alembic upgrade head
+   ```
 
-taste_vector = build_user_taste_vector(db, user_id)
+6. **Ingest book data:**
+   ```bash
+   python -m app.scripts.ingest_books
+   ```
 
+7. **Run the backend:**
+   ```bash
+   uvicorn app.main:app --reload
+   ```
 
-If the user is new → None is returned safely.
+### Frontend Setup
 
-4️⃣ Vector Blending (Smart Default)
+1. **Navigate to frontend directory:**
+   ```bash
+   cd frontend
+   ```
 
-We blend who the user is with what they asked for:
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
 
-final_vector =
-  0.7 × taste_vector
-+ 0.3 × prompt_vector
+3. **Start the development server:**
+   ```bash
+   npx expo start
+   ```
 
+4. **Run on specific platform:**
+   - iOS: `npx expo run:ios`
+   - Android: `npx expo run:android`
+   - Web: `npx expo start --web`
 
-If no taste exists → prompt vector is used alone.
+## Usage
 
-This ensures:
+### Backend API
 
-cold-start works
+The backend provides RESTful APIs for recommendations and user management.
 
-learning improves results over time
+**Get Recommendations:**
+```bash
+curl -X POST "http://localhost:8000/api/v1/recommend" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_id": "user123",
+    "genres": ["romance"],
+    "vibes": ["dark"],
+    "themes": ["intimacy"],
+    "pacePreference": "Slow burn",
+    "lengthPreference": "Short & sweet (< 300 pages)",
+    "limit": 5
+  }'
+```
 
-5️⃣ Semantic Search (Qdrant)
+**Track User Signals:**
+```bash
+curl -X POST "http://localhost:8000/api/v1/signals/event" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_id": "user123",
+    "book_id": "book456",
+    "signal": "click"
+  }'
+```
 
-We search the books_clean collection:
+### Frontend App
 
-qdrant.search(
-  collection_name="books_clean",
-  query_vector=vector,
-  limit=limit * 3,
-)
+1. Open the app on your device/emulator
+2. Answer preference questions to set up your profile
+3. Browse recommendations on the Discover screen
+4. Save interesting books for later
+5. Interact with books to improve future recommendations
 
+## Recommendation Flow (Detailed)
 
-We over-fetch to allow intelligent re-ranking.
+1. **User Request** (`/api/v1/recommend`):
+   The client sends preferences, vibes, themes, and reading preferences.
 
-6️⃣ Hybrid Ranking (The Secret Sauce 🧪)
+2. **Semantic Embedding**:
+   User intent is converted to a 384-dimensional vector using MiniLM transformer.
 
-Each book is scored using:
+3. **User Taste Vector**:
+   Historical behavior (clicks, likes, saves) builds a personalized taste vector.
 
-Component	Weight
-Vector similarity	60%
-Genre overlap	25%
-Page preference	15%
-final_score =
-  0.6 * vector_score +
-  0.25 * genre_score +
-  0.15 * page_score
+4. **Vector Blending**:
+   Combines taste vector (70%) and prompt vector (30%) for cold-start resilience.
 
+5. **Semantic Search**:
+   Queries Qdrant for top matches, over-fetching for re-ranking.
 
-This makes recommendations feel deliberate, not random.
+6. **Hybrid Ranking**:
+   Scores books using:
+   - Vector similarity: 60%
+   - Genre overlap: 25%
+   - Page preference: 15%
 
-7️⃣ Final Response
+7. **Response**:
+   Returns sorted, scored recommendations with explanations.
 
-Sorted, trimmed, and returned:
+## API Documentation
 
-{
-  "title": "Lost in the Dark",
-  "author": "Brad Weismann",
-  "score": 0.2471
-}
+Full API documentation is available at `http://localhost:8000/docs` when the backend is running.
 
-🧠 User Behavior Tracking (/signals/event)
+Key endpoints:
+- `POST /api/v1/recommend` - Get book recommendations
+- `POST /api/v1/signals/event` - Track user interactions
+- `GET /api/v1/books` - Search books
+- `GET /api/v1/health` - Health check
 
-Every meaningful interaction is recorded:
+## Tech Stack
 
-{
-  "user_id": "uuid",
-  "book_id": "XCQmzgEACAAJ",
-  "signal": "click"
-}
+### Backend
+- **FastAPI**: High-performance async web framework
+- **Qdrant**: Vector database for semantic search
+- **SentenceTransformers**: Embedding models
+- **PostgreSQL**: Relational database for user data
+- **SQLAlchemy**: ORM for database operations
+- **Docker**: Containerization
 
+### Frontend
+- **React Native**: Cross-platform mobile development
+- **Expo**: Framework for universal React apps
+- **TypeScript**: Type-safe JavaScript
+- **Expo Router**: File-based routing
+- **Zustand**: State management
+- **TanStack Query**: Data fetching and caching
 
-This fuels:
+## Contributing
 
-personalization
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/amazing-feature`
+3. Commit your changes: `git commit -m 'Add amazing feature'`
+4. Push to the branch: `git push origin feature/amazing-feature`
+5. Open a Pull Request
 
-long-term learning
+Please ensure all tests pass and add tests for new features.
 
-future explainability
+## License
 
-🗄️ Vector Database (Qdrant)
-
-Collection: books_clean
-
-Vectors: 384-dim (MiniLM)
-
-Distance: Cosine
-
-Payload: title, author, genres, pages, cover
-
-Books are ingested via:
-
-python -m app.scripts.ingest_books
-
-⚙️ Tech Stack
-
-FastAPI — API framework
-
-Qdrant — Vector database
-
-SentenceTransformers — Embeddings
-
-PostgreSQL — User behavior storage
-
-SQLAlchemy — ORM
-
-Docker — Qdrant containerization
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
