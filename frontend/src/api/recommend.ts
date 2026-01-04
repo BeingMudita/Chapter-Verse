@@ -23,7 +23,7 @@ export type RecommendedBook = {
 export async function fetchRecommendations(
   payload: RecommendRequest
 ): Promise<RecommendedBook[]> {
-  const res = await fetch("http://127.0.0.1:8000/api/v1/recommend", {
+  const res = await fetch("http://10.0.2.2:8000/api/v1/recommend", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),

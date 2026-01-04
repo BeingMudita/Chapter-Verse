@@ -23,7 +23,7 @@ import { useSavedBooks } from "@/contexts/SavedBooksContext";
 // preferences hook (get user answers)
 import { usePreferences } from "@/contexts/PreferencesContext";
 import { fetchRecommendations } from "@/src/api/recommend";
-import {sendSignal} from "@/src/api/signals";
+import { sendSignal } from "@/src/api/signal";
 import { mapRecommendedBook } from "@/src/utils/mapBook";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
