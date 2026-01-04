@@ -26,7 +26,7 @@ class BookResponse(BaseModel):
     pages: Optional[int]
     cover_url: Optional[str]
     score: float
-
+    reasons: list[str] = []
 
 # ---------- SIGNALS ----------
 class UserSignalRequest(BaseModel):

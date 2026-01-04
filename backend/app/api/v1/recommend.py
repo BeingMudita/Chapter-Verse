@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 from qdrant_client import QdrantClient
 from app.api.v1.schemas import RecommendRequest, BookResponse
+from app.services.explain import build_reasons
 from app.vector.embedding import embed_text
 from app.services.user_profile import (
     build_user_taste_vector,
@@ -56,7 +57,7 @@ def recommend_books(payload: RecommendRequest,db: Session = Depends(get_db)):
         taste_vector=taste_vector,
     )
     print("Taste vector exists:", taste_vector is not None)
-
+    
     results = qdrant.search(
         collection_name="books_clean",
         query_vector=vector,
@@ -78,7 +79,15 @@ def recommend_books(payload: RecommendRequest,db: Session = Depends(get_db)):
             + 0.25 * g_score
             + 0.15 * p_score
         )
-
+        reasons = build_reasons(
+            vector_score=v_score,
+            genre_score=g_score,
+            page_score=p_score,
+            user_genres=payload.genres,
+            book_genres=data.get("genres", []),
+            used_taste_vector=taste_vector is not None,
+            pages=data.get("pages"),
+        )
         ranked.append(
             BookResponse(
                 id=data.get("id"),
@@ -89,6 +98,7 @@ def recommend_books(payload: RecommendRequest,db: Session = Depends(get_db)):
                 pages=data.get("pages"),
                 cover_url=data.get("cover_url"),
                 score=round(final_score, 4),
+                reasons=reasons,
             )
         )
 
