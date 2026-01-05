@@ -34,10 +34,16 @@ const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.25;
 export default function DiscoverScreen() {
   const { preferences } = usePreferences();
   const { savedBooks, addBook } = useSavedBooks();
+  const [showDetails, setShowDetails] = useState(false);
 
   // Books ordered by simple score computed from preferences
   const [books, setBooks] = useState<Book[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    setShowDetails(false);
+  }, [currentIndex]);
+
 
   useEffect(() => {
   if (!preferences) return;
@@ -113,26 +119,30 @@ export default function DiscoverScreen() {
     }).start(() => onSwipeComplete(direction));
   };
 
-  const onSwipeComplete = (direction: "left" | "right") => {
+  const onSwipeComplete = async (direction: "left" | "right") => {
     const book = books[currentIndex];
     if (!book) return;
+
+    const user_id = await getUserId();
 
     if (direction === "right") {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       addBook(book);
+
       sendSignal({
-        user_id: "c3f7b7c1-5b8b-4a5c-9c6a-1d8c1f5a9d21", // replace with auth later
+        user_id,
         book_id: book.id,
-        signal:"like",
+        signal: "like",
       });
     } else {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
-    sendSignal({
-        user_id: "c3f7b7c1-5b8b-4a5c-9c6a-1d8c1f5a9d21", // replace with auth later
+
+      sendSignal({
+        user_id,
         book_id: book.id,
-        signal:"like",
+        signal: "click",
       });
+    }
 
     position.setValue({ x: 0, y: 0 });
     setCurrentIndex((i) => i + 1);
@@ -226,33 +236,68 @@ export default function DiscoverScreen() {
           )}
 
           {currentBook && (
-            <Animated.View
-              {...panResponder.panHandlers}
-              style={[
-                styles.card,
-                {
-                  transform: [
-                    { translateX: position.x },
-                    { translateY: position.y },
-                    { rotate: rotate },
-                  ],
-                },
-              ]}
-            >
-              <Image source={{ uri: currentBook.coverUrl }} style={styles.cover} resizeMode="cover" />
-              <Text style={styles.bookTitle}>{currentBook.title}</Text>
-              <Text style={styles.bookAuthor}>{currentBook.author}</Text>
+            <Pressable onPress={() => setShowDetails(v => !v)}>
+              <Animated.View
+                {...panResponder.panHandlers}
+                style={[
+                  styles.card,
+                  {
+                    transform: [
+                      { translateX: position.x },
+                      { translateY: position.y },
+                      { rotate: rotate },
+                    ],
+                  },
+                ]}
+              >
+                <Image
+                  source={{ uri: currentBook.coverUrl }}
+                  style={styles.cover}
+                  resizeMode="cover"
+                />
 
-              <View style={styles.matchPills}>
-                {preferences?.genres?.some((g: string) => currentBook.genres.includes(g)) && (
-                  <View style={styles.pill}><Text style={styles.pillText}>Genre match</Text></View>
+                <Text style={styles.bookTitle}>{currentBook.title}</Text>
+                <Text style={styles.bookAuthor}>{currentBook.author}</Text>
+
+                {/* Match pills */}
+                <View style={styles.matchPills}>
+                  {preferences?.genres?.some(g => currentBook.genres.includes(g)) && (
+                    <View style={styles.pill}>
+                      <Text style={styles.pillText}>Genre match</Text>
+                    </View>
+                  )}
+                  {preferences?.vibes?.some(v => currentBook.vibes?.includes(v)) && (
+                    <View style={styles.pill}>
+                      <Text style={styles.pillText}>Vibe match</Text>
+                    </View>
+                  )}
+                </View>
+
+                {/* 👇 DETAILS PANEL */}
+                {showDetails && (
+                  <View style={styles.detailsPanel}>
+                    {currentBook.reasons?.length ? (
+                      <View style={styles.reasons}>
+                        {currentBook.reasons.map(reason => (
+                          <View key={reason} style={styles.reasonChip}>
+                            <Text style={styles.reasonText}>{reason}</Text>
+                          </View>
+                        ))}
+                      </View>
+                    ) : null}
+
+                    {currentBook.description ? (
+                      <Text style={styles.description} numberOfLines={4}>
+                        {currentBook.description}
+                      </Text>
+                    ) : null}
+                  </View>
                 )}
-                {preferences?.vibes?.some((v: string) => currentBook.vibes.includes(v)) && (
-                  <View style={styles.pill}><Text style={styles.pillText}>Vibe match</Text></View>
-                )}
-              </View>
-            </Animated.View>
-          )}
+
+                <Text style={styles.tapHint}>Tap for details</Text>
+              </Animated.View>
+            </Pressable>
+      )}
         </View>
 
         <View style={styles.controls}>
@@ -407,6 +452,49 @@ const styles = StyleSheet.create({
       borderRadius: 10,
       alignItems: "center",
     },
+    detailsPanel: {
+  marginTop: 12,
+  padding: 12,
+  backgroundColor: Colors.light.background,
+  borderRadius: 14,
+  borderWidth: 1,
+  borderColor: Colors.light.border,
+},
+
+reasons: {
+  flexDirection: "row",
+  flexWrap: "wrap",
+  marginBottom: 8,
+},
+
+reasonChip: {
+  backgroundColor: Colors.light.accent,
+  paddingHorizontal: 10,
+  paddingVertical: 4,
+  borderRadius: 16,
+  marginRight: 6,
+  marginBottom: 6,
+},
+
+reasonText: {
+  fontSize: 12,
+  color: Colors.light.primary,
+  fontWeight: "600",
+},
+
+description: {
+  fontSize: 13,
+  color: Colors.light.text,
+  lineHeight: 18,
+},
+
+tapHint: {
+  marginTop: 6,
+  fontSize: 11,
+  color: Colors.light.secondary,
+  opacity: 0.7,
+  textAlign: "center",
+},
     likeButton: {
       flex: 1,
       paddingVertical: 12,
