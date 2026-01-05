@@ -25,7 +25,8 @@
       "package": "app.rork.bookmatch_lite",
       "permissions": [
         "android.permission.VIBRATE"
-      ]
+      ],
+      "useCleartextTraffic": true
     },
     "web": {
       "favicon": "./assets/images/favicon.jpg"

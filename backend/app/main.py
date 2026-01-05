@@ -17,13 +17,16 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:8081",  # expo web
-        "http://localhost:19006", # older expo web
+        "http://localhost:8081",
+        "http://127.0.0.1:8081",
+        "http://192.168.31.182:8081",
+        "*"  # fine for dev
     ],
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["*"],   # THIS enables OPTIONS
     allow_headers=["*"],
 )
+
 
 app.include_router(api_router, prefix="/api/v1")
 
@@ -31,3 +34,10 @@ app.include_router(api_router, prefix="/api/v1")
 @app.get("/")
 def root():
     return {"status": "ok"}
+
+@app.get("/health")
+def health():
+    return {"ok": True}
+@app.get("/ping")
+def ping():
+    return {"ping": "pong!"}

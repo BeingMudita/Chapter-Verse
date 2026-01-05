@@ -42,12 +42,10 @@ export default function DiscoverScreen() {
   useEffect(() => {
   if (!preferences) return;
 
-  (async () => {
+  const load = async () => {
     try {
-      const user_id = await getUserId();
-
-      const recommendedBooks = await fetchRecommendations({
-        user_id,
+      const result = await fetchRecommendations({
+        user_id: "c3f7b7c1-5b8b-4a5c-9c6a-1d8c1f5a9d21", // replace with auth later
         genres: preferences.genres ?? [],
         vibes: preferences.vibes ?? [],
         themes: preferences.themes ?? [],
@@ -56,15 +54,16 @@ export default function DiscoverScreen() {
         limit: 10,
       });
 
-      const mappedBooks = recommendedBooks.map(mapRecommendedBook);
-      setBooks(mappedBooks);
+      const mapped = result.map(mapRecommendedBook);
+      setBooks(mapped);
       setCurrentIndex(0);
     } catch (err) {
       console.error("Failed to load recommendations", err);
     }
-  })();
-}, [preferences]);
+  };
 
+  load();
+}, [preferences]);
   
   const position = useRef(new Animated.ValueXY()).current;
 

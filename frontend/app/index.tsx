@@ -1,7 +1,7 @@
 import { router } from "expo-router";
 import * as Haptics from "expo-haptics";
 import { Heart, Sparkles } from "lucide-react-native";
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Animated,
   Pressable,
@@ -16,6 +16,19 @@ import { getUserId } from "@/src/utils/user";
 
 export default function WelcomeScreen() {
   const scaleAnim = React.useRef(new Animated.Value(1)).current;
+  useEffect(() => {
+    fetch("http://192.168.31.101:8000/ping")
+      .then(res => res.json())
+      .then(console.log)
+      .catch(err => console.error("PING FAILED", err));
+  }, []);
+  useEffect(() => {
+    fetch("http://192.168.31.101:8000/health")
+      .then(res => res.json())
+      .then(console.log)
+      .catch(err => console.error("Health FAILED", err));
+  }, []);
+
 
   const handlePressIn = () => {
     Animated.spring(scaleAnim, {
@@ -32,6 +45,7 @@ export default function WelcomeScreen() {
       useNativeDriver: true,
     }).start();
   };
+  
 
   const handleStart = async() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
