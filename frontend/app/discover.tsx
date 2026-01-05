@@ -25,6 +25,8 @@ import { usePreferences } from "@/contexts/PreferencesContext";
 import { fetchRecommendations } from "@/src/api/recommend";
 import { sendSignal } from "@/src/api/signal";
 import { mapRecommendedBook } from "@/src/utils/mapBook";
+import { getUserId } from "@/src/utils/user";
+
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.25;
@@ -38,31 +40,32 @@ export default function DiscoverScreen() {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
-    if (!preferences) return;
+  if (!preferences) return;
 
-    const load = async () => {
-      try {
-        const result = await fetchRecommendations({
-          user_id: "c3f7b7c1-5b8b-4a5c-9c6a-1d8c1f5a9d21", // replace with auth later
-          genres: preferences.genres ?? [],
-          vibes: preferences.vibes ?? [],
-          themes: preferences.themes ?? [],
-          pacePreference: preferences.pacePreference ?? null,
-          lengthPreference: preferences.lengthPreference ?? null,
-          limit: 10,
-        });
+  (async () => {
+    try {
+      const user_id = await getUserId();
 
-        const mapped = result.map(mapRecommendedBook);
-        setBooks(mapped);
-        setCurrentIndex(0);
-      } catch (err) {
-        console.error("Failed to load recommendations", err);
-      }
-    };
+      const recommendedBooks = await fetchRecommendations({
+        user_id,
+        genres: preferences.genres ?? [],
+        vibes: preferences.vibes ?? [],
+        themes: preferences.themes ?? [],
+        pacePreference: preferences.pacePreference ?? null,
+        lengthPreference: preferences.lengthPreference ?? null,
+        limit: 10,
+      });
 
-    load();
-  }, [preferences]);
+      const mappedBooks = recommendedBooks.map(mapRecommendedBook);
+      setBooks(mappedBooks);
+      setCurrentIndex(0);
+    } catch (err) {
+      console.error("Failed to load recommendations", err);
+    }
+  })();
+}, [preferences]);
 
+  
   const position = useRef(new Animated.ValueXY()).current;
 
   const rotate = position.x.interpolate({

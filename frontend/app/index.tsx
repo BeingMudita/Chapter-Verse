@@ -12,6 +12,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import Colors from "@/constants/colors";
+import { getUserId } from "@/src/utils/user";
 
 export default function WelcomeScreen() {
   const scaleAnim = React.useRef(new Animated.Value(1)).current;
@@ -32,8 +33,9 @@ export default function WelcomeScreen() {
     }).start();
   };
 
-  const handleStart = () => {
+  const handleStart = async() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    await getUserId();
     router.push("/questions");
   };
 
