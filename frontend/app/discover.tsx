@@ -236,68 +236,33 @@ export default function DiscoverScreen() {
           )}
 
           {currentBook && (
-            <Pressable onPress={() => setShowDetails(v => !v)}>
-              <Animated.View
-                {...panResponder.panHandlers}
-                style={[
-                  styles.card,
-                  {
-                    transform: [
-                      { translateX: position.x },
-                      { translateY: position.y },
-                      { rotate: rotate },
-                    ],
-                  },
-                ]}
-              >
-                <Image
-                  source={{ uri: currentBook.coverUrl }}
-                  style={styles.cover}
-                  resizeMode="cover"
-                />
+            <Animated.View
+              {...panResponder.panHandlers}
+              style={[
+                styles.card,
+                {
+                  transform: [
+                    { translateX: position.x },
+                    { translateY: position.y },
+                    { rotate: rotate },
+                  ],
+                },
+              ]}
+            >
+              <Image source={{ uri: currentBook.coverUrl }} style={styles.cover} resizeMode="cover" />
+              <Text style={styles.bookTitle}>{currentBook.title}</Text>
+              <Text style={styles.bookAuthor}>{currentBook.author}</Text>
 
-                <Text style={styles.bookTitle}>{currentBook.title}</Text>
-                <Text style={styles.bookAuthor}>{currentBook.author}</Text>
-
-                {/* Match pills */}
-                <View style={styles.matchPills}>
-                  {preferences?.genres?.some(g => currentBook.genres.includes(g)) && (
-                    <View style={styles.pill}>
-                      <Text style={styles.pillText}>Genre match</Text>
-                    </View>
-                  )}
-                  {preferences?.vibes?.some(v => currentBook.vibes?.includes(v)) && (
-                    <View style={styles.pill}>
-                      <Text style={styles.pillText}>Vibe match</Text>
-                    </View>
-                  )}
-                </View>
-
-                {/* 👇 DETAILS PANEL */}
-                {showDetails && (
-                  <View style={styles.detailsPanel}>
-                    {currentBook.reasons?.length ? (
-                      <View style={styles.reasons}>
-                        {currentBook.reasons.map(reason => (
-                          <View key={reason} style={styles.reasonChip}>
-                            <Text style={styles.reasonText}>{reason}</Text>
-                          </View>
-                        ))}
-                      </View>
-                    ) : null}
-
-                    {currentBook.description ? (
-                      <Text style={styles.description} numberOfLines={4}>
-                        {currentBook.description}
-                      </Text>
-                    ) : null}
-                  </View>
+              <View style={styles.matchPills}>
+                {preferences?.genres?.some((g: string) => currentBook.genres.includes(g)) && (
+                  <View style={styles.pill}><Text style={styles.pillText}>Genre match</Text></View>
                 )}
-
-                <Text style={styles.tapHint}>Tap for details</Text>
-              </Animated.View>
-            </Pressable>
-      )}
+                {preferences?.vibes?.some((v: string) => currentBook.vibes.includes(v)) && (
+                  <View style={styles.pill}><Text style={styles.pillText}>Vibe match</Text></View>
+                )}
+              </View>
+            </Animated.View>
+          )}
         </View>
 
         <View style={styles.controls}>
@@ -452,49 +417,6 @@ const styles = StyleSheet.create({
       borderRadius: 10,
       alignItems: "center",
     },
-    detailsPanel: {
-  marginTop: 12,
-  padding: 12,
-  backgroundColor: Colors.light.background,
-  borderRadius: 14,
-  borderWidth: 1,
-  borderColor: Colors.light.border,
-},
-
-reasons: {
-  flexDirection: "row",
-  flexWrap: "wrap",
-  marginBottom: 8,
-},
-
-reasonChip: {
-  backgroundColor: Colors.light.accent,
-  paddingHorizontal: 10,
-  paddingVertical: 4,
-  borderRadius: 16,
-  marginRight: 6,
-  marginBottom: 6,
-},
-
-reasonText: {
-  fontSize: 12,
-  color: Colors.light.primary,
-  fontWeight: "600",
-},
-
-description: {
-  fontSize: 13,
-  color: Colors.light.text,
-  lineHeight: 18,
-},
-
-tapHint: {
-  marginTop: 6,
-  fontSize: 11,
-  color: Colors.light.secondary,
-  opacity: 0.7,
-  textAlign: "center",
-},
     likeButton: {
       flex: 1,
       paddingVertical: 12,
